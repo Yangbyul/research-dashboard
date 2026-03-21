@@ -54,7 +54,7 @@
   .kw-network { position: relative; width: 100%; height: auto; overflow: hidden; }
   .kw-network canvas { height: 100% !important; max-height: 450px; min-width: 900px; }
   .kw-network img { width: 100%; height: auto; }
-  .kw-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; color: var(--muted); justify-content: center; }
+  .kw-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0; font-size: 0.75rem; color: var(--muted); justify-content: center; }
   .kw-legend span { padding: 0.2rem 0.5rem; border-radius: 10px; background: #ffffff08; }
 
   /* Timeline */
@@ -1482,7 +1482,7 @@ grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column">
 grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>☁️</span> 키워드 워드클라우드</h2><div style="flex:1;position:relative;min-height:300px"><canvas id="kwCloudCanvas" style="width:100%;height:100%"></canvas></div></div>`;
 
 // Row 3: 키워드 동시출현 네트워크 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>🏷️</span> 키워드 동시출현 네트워크</h2><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend"></div></div>`;
+grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.8rem"><h2><span>🏷️</span> 키워드 동시출현 네트워크 <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(드래그/줌 가능)</span></h2><div id="kwNetworkVis" style="height:500px;width:100%;margin-bottom:0"></div><div class="kw-legend" id="kwLegend" style="margin-top:0;padding-top:0"></div></div>`;
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
 grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><canvas id="chartMethod"></canvas></div>`;
@@ -1639,9 +1639,9 @@ new Chart(document.getElementById('chartTech'), {
   const data = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
   const options = {
     physics: {
-      forceAtlas2Based: { gravitationalConstant: -30, centralGravity: 0.005, springLength: 120, springConstant: 0.05 },
+      forceAtlas2Based: { gravitationalConstant: -40, centralGravity: 0.01, springLength: 80, springConstant: 0.06 },
       solver: 'forceAtlas2Based',
-      stabilization: { iterations: 150 }
+      stabilization: { iterations: 200 }
     },
     interaction: { hover: true, tooltipDelay: 100, zoomView: true, dragView: true },
     nodes: { shape: 'dot' },
@@ -1649,6 +1649,7 @@ new Chart(document.getElementById('chartTech'), {
     layout: { improvedLayout: true }
   };
   const network = new vis.Network(container, data, options);
+  network.once('stabilizationIterationsDone', () => { network.fit({ animation: false, maxZoomLevel: 1.5, minZoomLevel: 0.5 }); });
 
   // Legend
   const usedCommunities = [...new Set(visNodes.map(n => n.community))].filter(Boolean);
