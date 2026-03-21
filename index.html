@@ -1482,7 +1482,7 @@ grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column">
 grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>☁️</span> 키워드 워드클라우드</h2><div style="flex:1;position:relative;min-height:300px"><canvas id="kwCloudCanvas" style="width:100%;height:100%"></canvas></div></div>`;
 
 // Row 3: 키워드 동시출현 네트워크 (full-width)
-grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h2 style="margin-bottom:0.5rem"><span>🏷️</span> 키워드 동시출현 네트워크 <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(드래그/줌 가능)</span></h2><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend" style="margin-top:-1.5rem"></div></div>`;
+grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h2 style="margin-bottom:0.5rem"><span>🏷️</span> 키워드 동시출현 네트워크 <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(드래그/줌 가능)</span></h2><div style="position:relative"><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend" style="position:absolute;bottom:1rem;left:0;right:0"></div></div></div>`;
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
 grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><canvas id="chartMethod"></canvas></div>`;
