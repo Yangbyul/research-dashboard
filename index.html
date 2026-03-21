@@ -181,7 +181,7 @@ document.getElementById('statsRow').innerHTML = [
   {num: intlPapers, label: "국외 논문", color: "var(--accent3)"},
   {num: ssciPapers, label: "SSCI/SCIE/SCOPUS", color: "var(--accent4)"},
   {num: uniqueJournals, label: "투고 저널 수", color: "var(--accent5)"},
-  {num: papers.filter(p=>p.type==='book_chapter').length, label: "Book Chapters", color: "var(--accent6)"},
+  {num: papers.filter(p=>p.type==='book_chapter'||p.type==='conference').length, label: "Proceedings/Chapters", color: "var(--accent6)"},
 ].map(s => `<div class="stat-card"><div class="num" style="color:${s.color}">${s.num}</div><div class="label">${s.label}</div></div>`).join('');
 
 // ===== BUILD GRID =====
