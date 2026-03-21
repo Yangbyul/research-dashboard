@@ -536,16 +536,24 @@ new Chart(document.getElementById('chartTech'), {
   const maxKw = sortedKw[0]?.[1] || 1;
   const wcColors = ['#60a5fa','#a78bfa','#34d399','#fbbf24','#f87171','#fb923c','#e879f9','#22d3ee','#84cc16','#f472b6'];
 
-  // Filter 2+ and shuffle for natural cloud look
-  const shuffled = [...sortedKw].filter(([k,c]) => c >= 2).sort(() => Math.random() - 0.5);
-  document.getElementById('kwCloud').innerHTML = shuffled.map(([kw, cnt]) => {
+  // Main keywords (2+) large, then 1-count keywords small around them
+  const mainKw = sortedKw.filter(([k,c]) => c >= 2).sort(() => Math.random() - 0.5);
+  const subKw = sortedKw.filter(([k,c]) => c === 1).sort(() => Math.random() - 0.5);
+
+  const mainHtml = mainKw.map(([kw, cnt]) => {
     const ratio = cnt / maxKw;
-    const size = 0.6 + ratio * 1.8;
+    const size = 0.8 + ratio * 1.6;
     const color = wcColors[Math.floor(Math.random() * wcColors.length)];
-    const weight = ratio > 0.5 ? '700' : ratio > 0.25 ? '600' : '400';
-    const opacity = ratio > 0.5 ? 'ff' : ratio > 0.25 ? 'cc' : '99';
-    return `<span style="color:${color}${opacity};font-size:${size}rem;font-weight:${weight};cursor:default;display:inline-block;padding:0.1rem 0.4rem;line-height:1.4;transition:transform 0.2s" title="${kw}: ${cnt}회" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${kw}</span>`;
+    const weight = ratio > 0.5 ? '700' : ratio > 0.25 ? '600' : '500';
+    return `<span style="color:${color};font-size:${size}rem;font-weight:${weight};cursor:default;display:inline-block;padding:0.1rem 0.4rem;line-height:1.4;transition:transform 0.2s" title="${kw}: ${cnt}회" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${kw}</span>`;
   }).join('');
+
+  const subHtml = subKw.map(([kw, cnt]) => {
+    const color = wcColors[Math.floor(Math.random() * wcColors.length)];
+    return `<span style="color:${color}66;font-size:0.55rem;font-weight:400;cursor:default;display:inline-block;padding:0.05rem 0.3rem;line-height:1.3" title="${kw}: ${cnt}회">${kw}</span>`;
+  }).join('');
+
+  document.getElementById('kwCloud').innerHTML = mainHtml + subHtml;
 }
 
 // Method chart
