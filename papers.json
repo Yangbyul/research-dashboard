@@ -9,7 +9,7 @@
     "coauthors": [
       "류지헌"
     ],
-    "role": "1저자(단독)",
+    "role": "1저자",
     "keywords": [
       "증강현실",
       "세분화",
@@ -1170,7 +1170,7 @@
       "Lee, Y.J.",
       "Lee, J.H."
     ],
-    "role": "공저자",
+    "role": "교신저자",
     "keywords": [
       "hologram",
       "pedagogical agent",
@@ -1225,15 +1225,45 @@
   },
   {
     "year": 2025,
+    "id": "2025-5",
+    "title": "The impact of task complexity and self-regulated supports on cognitive load and emotional engagement through multimodal analysis in the metaverse learning environment",
+    "journal": "Frontiers in Psychology (SSCI)",
+    "lang": "en",
+    "type": "journal",
+    "coauthors": [],
+    "role": "1저자",
+    "keywords": [
+      "task complexity",
+      "self-regulated learning",
+      "cognitive load",
+      "emotional engagement",
+      "multimodal analysis",
+      "metaverse"
+    ],
+    "tech": [
+      "메타버스"
+    ],
+    "method": [
+      "멀티모달분석"
+    ],
+    "target": [
+      "대학생"
+    ],
+    "dv": [
+      "인지부하",
+      "정서참여"
+    ],
+    "line": "멀티모달 학습분석"
+  },
+  {
+    "year": 2025,
     "id": "2025-4",
     "title": "메타버스 학습환경에서 인지조절 전략 제공 방식과 과제 유형이 대학생의 학습참여와 정서에 미치는 영향",
     "journal": "교육방법연구 (KCI)",
     "lang": "ko",
     "type": "journal",
-    "coauthors": [
-      "류지헌"
-    ],
-    "role": "1저자",
+    "coauthors": [],
+    "role": "단독",
     "keywords": [
       "메타버스",
       "인지조절전략",
