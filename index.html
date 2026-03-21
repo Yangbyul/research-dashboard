@@ -225,7 +225,7 @@ grid.innerHTML += `<div class="card full-width"><h2><span>🗺️</span> 연구 
 grid.innerHTML += `<div class="card full-width"><h2><span>💡</span> 미래 연구 방향</h2><div id="suggestions"></div></div>`;
 
 // Row 8: 전체 논문 목록 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>📋</span> 전체 논문 목록</h2><div class="filter-row" id="filterRow"></div><div class="table-scroll"><table class="paper-table" id="paperTable"><thead><tr><th>연도</th><th>제목</th><th>저널</th><th>역할</th><th>연구라인</th><th>기술</th></tr></thead><tbody></tbody></table></div></div>`;
+grid.innerHTML += `<div class="card full-width"><h2><span>📋</span> 전체 논문 목록</h2><div class="filter-row" id="filterRow"></div><div class="table-scroll"><table class="paper-table" id="paperTable"><thead><tr><th>연도</th><th>제목</th><th>저널</th><th>구분</th><th>역할</th><th>연구라인</th><th>기술</th></tr></thead><tbody></tbody></table></div></div>`;
 
 // ===== CHARTS =====
 const yearCounts = {};
@@ -618,11 +618,16 @@ function renderTable(filter) {
   const filtered = filter === 'all' ? papers : papers.filter(p => p.line === filter);
   tbody.innerHTML = filtered.sort((a,b) => b.year - a.year || a.id.localeCompare(b.id)).map(p => {
     const lc = lineColors[p.line] || {cls:'line-sim'};
+    const jMatch = p.journal.match(/\(([^)]+)\)\s*$/);
+    const idx = jMatch ? jMatch[1] : (p.type==='conference'?'Proceedings':p.type==='book_chapter'?'Book Chapter':'');
+    const jName = jMatch ? p.journal.replace(/\s*\([^)]+\)\s*$/, '') : p.journal;
+    const idxColor = idx.includes('SSCI')?'#60a5fa':idx.includes('SCOPUS')?'#34d399':idx.includes('KCI')?'#fbbf24':'var(--muted)';
     return `<tr>
       <td>${p.year}</td>
       <td style="max-width:400px">${p.title.length > 70 ? p.title.slice(0,70)+'...' : p.title}</td>
-      <td style="font-size:0.75rem">${p.journal}</td>
-      <td><span style="color:${p.role==='1저자'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
+      <td style="font-size:0.75rem">${jName}</td>
+      <td style="font-size:0.7rem;white-space:nowrap"><span style="color:${idxColor}">${idx}</span></td>
+      <td style="white-space:nowrap"><span style="color:${p.role==='1저자'||p.role==='교신저자'||p.role==='단독'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
       <td><span class="line-badge ${lc.cls}">${p.line}</span></td>
       <td style="font-size:0.7rem;color:var(--muted)">${p.tech.join(', ')}</td>
     </tr>`;
