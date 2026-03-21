@@ -48,7 +48,7 @@
   .card h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .card h2 span { font-size: 1.2rem; }
   .full-width { grid-column: 1 / -1; }
-  canvas { max-height: 350px; }
+  canvas { max-height: 350px; max-width: 100%; }
 
   /* Keyword network */
   .kw-network { position: relative; width: 100%; height: 450px; }
@@ -106,7 +106,9 @@
     .stat-card { padding: 1rem 0.5rem; }
     .stat-card .num { font-size: 1.8rem; }
     .stat-card .label { font-size: 0.7rem; }
-    .grid, .stats-row { margin-left: 0.3rem; margin-right: 0.3rem; }
+    .stats-row { margin-left: 0.3rem; margin-right: 0.3rem; }
+    .grid { margin-left: 0.3rem; margin-right: 0.3rem; overflow: hidden; }
+    .card { overflow: hidden; }
   }
 </style>
 </head>
