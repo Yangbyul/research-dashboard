@@ -51,8 +51,9 @@
   canvas { max-height: 350px; max-width: 100%; }
 
   /* Keyword network */
-  .kw-network { position: relative; width: 100%; height: 450px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+  .kw-network { position: relative; width: 100%; height: auto; overflow: hidden; }
   .kw-network canvas { height: 100% !important; max-height: 450px; min-width: 900px; }
+  .kw-network img { width: 100%; height: auto; }
   .kw-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; color: var(--muted); justify-content: center; }
   .kw-legend span { padding: 0.2rem 0.5rem; border-radius: 10px; background: #ffffff08; }
 
@@ -494,7 +495,17 @@ new Chart(document.getElementById('chartTech'), {
   const usedCommunities = [...new Set(nodes.map(n => n.community))];
   document.getElementById('kwLegend').innerHTML =
     usedCommunities.map(c => `<span style="border-left:3px solid ${communityColors[c]||'#94a3b8'};padding-left:0.4rem">${c}</span>`).join('') +
-    `<span style="margin-left:1rem">| 노드 크기 = 연결중심성(degree centrality) | 간선 굵기 = 동시출현 빈도</span>`;
+    `<span style="margin-left:1rem">| 노드 크기 = 연결중심성 | 간선 굵기 = 동시출현 빈도</span>`;
+
+  // Convert canvas to image for mobile (no scroll needed)
+  if (window.innerWidth < 768) {
+    const imgUrl = canvas.toDataURL();
+    const img = document.createElement('img');
+    img.src = imgUrl;
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    canvas.parentElement.replaceChild(img, canvas);
+  }
 }
 
 // Keyword word cloud (frequency-based)
