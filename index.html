@@ -497,9 +497,29 @@ new Chart(document.getElementById('chartTech'), {
     usedCommunities.map(c => `<span style="border-left:3px solid ${communityColors[c]||'#94a3b8'};padding-left:0.4rem">${c}</span>`).join('') +
     `<span style="margin-left:1rem">| 노드 크기 = 연결중심성 | 간선 굵기 = 동시출현 빈도</span>`;
 
-  // Convert canvas to image for mobile (no scroll needed)
+  // Convert canvas to high-res image for mobile (no scroll needed)
   if (window.innerWidth < 768) {
-    const imgUrl = canvas.toDataURL();
+    const scale = 2;
+    const bigCanvas = document.createElement('canvas');
+    bigCanvas.width = 1200 * scale;
+    bigCanvas.height = 450 * scale;
+    const bigCtx = bigCanvas.getContext('2d');
+    bigCtx.scale(scale, scale);
+    // Redraw on bigger canvas
+    edges.forEach(e => {
+      const s=nodeMap[e.source],t=nodeMap[e.target]; if(!s||!t) return;
+      bigCtx.beginPath(); bigCtx.moveTo(s.x,s.y); bigCtx.lineTo(t.x,t.y);
+      bigCtx.strokeStyle=`rgba(148,163,184,${0.1+e.weight*0.15})`; bigCtx.lineWidth=0.5+e.weight*0.8; bigCtx.stroke();
+    });
+    nodes.forEach(n => {
+      const r=6+(n.degree/maxDeg)*18;
+      bigCtx.beginPath(); bigCtx.arc(n.x,n.y,r,0,Math.PI*2); bigCtx.fillStyle=n.color+'88'; bigCtx.fill(); bigCtx.strokeStyle=n.color; bigCtx.lineWidth=2; bigCtx.stroke();
+      bigCtx.fillStyle='#e2e8f0'; bigCtx.font=`${Math.max(10,10+(n.degree/maxDeg)*5)}px sans-serif`; bigCtx.textAlign='center';
+      const ty=n.y+r+14, m=bigCtx.measureText(n.id);
+      bigCtx.fillStyle='rgba(15,23,42,0.8)'; bigCtx.fillRect(n.x-m.width/2-3,ty-7,m.width+6,14);
+      bigCtx.fillStyle='#e2e8f0'; bigCtx.fillText(n.id,n.x,ty);
+    });
+    const imgUrl = bigCanvas.toDataURL();
     const img = document.createElement('img');
     img.src = imgUrl;
     img.style.width = '100%';
