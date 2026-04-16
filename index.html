@@ -1402,7 +1402,14 @@ function zu(){return zu=Object.assign||function(g){for(var t=1;t<arguments.lengt
 </div>
 
 <script>
-const papers = [
+fetch('https://yangbyul.github.io/eunbyul-yang/data/papers.json')
+  .then(r => r.json())
+  .then(papers => { initDashboard(papers); })
+  .catch(() => { console.error('Failed to load papers.json'); });
+
+function initDashboard(papers) {
+// legacy fallback removed — data now loaded from eunbyul-yang/data/papers.json
+const _unused = [
   {year:2018,id:"2018-1",title:"증강현실 학습자료의 세분화 정도가 초등학생의 사용편의성과 인지부하에 미치는 영향",journal:"교육연구 (국내 기타)",lang:"ko",type:"journal",coauthors:["류지헌"],role:"1저자",keywords:["증강현실","세분화","사용편의성","인지부하","초등학생"],tech:["AR"],method:["실험연구"],target:["초등학생"],dv:["사용편의성","인지부하"],line:"AR/VR 학습자료"},
   {year:2019,id:"2019-1",title:"예비교사를 위한 수업시뮬레이션에서 시나리오 유형과 수행 안내 방법에 따른 가상실재감과 사용성 지각의 차이",journal:"미래교육학연구 (KCI)",lang:"ko",type:"journal",coauthors:["류지헌"],role:"1저자",keywords:["수업시뮬레이션","시나리오","가상실재감","사용성","예비교사"],tech:["VR","시뮬레이션"],method:["실험연구"],target:["예비교사"],dv:["가상실재감","사용성"],line:"수업시뮬레이션"},
   {year:2019,id:"2019-2",title:"증강현실 학습자료에서 가상캐릭터의 제시방법이 학습자의 의인화 지각, 인지부하의 변화와 주의집중에 미치는 효과",journal:"교육방법연구 (KCI)",lang:"ko",type:"journal",coauthors:["류지헌"],role:"공저자",keywords:["증강현실","가상캐릭터","의인화지각","인지부하","주의집중"],tech:["AR"],method:["실험연구","시선추적"],target:["대학생"],dv:["의인화지각","인지부하","주의집중"],line:"교수학습 에이전트"},
@@ -1442,6 +1449,7 @@ const papers = [
   {year:2025,id:"2025-5",title:"The impact of task complexity and self-regulated supports on cognitive load and emotional engagement through multimodal analysis in the metaverse learning environment",journal:"Frontiers in Psychology (SSCI)",lang:"en",type:"journal",coauthors:[],role:"1저자",keywords:["task complexity","self-regulated learning","cognitive load","emotional engagement","multimodal analysis","metaverse"],tech:["메타버스"],method:["멀티모달분석"],target:["대학생"],dv:["인지부하","정서참여"],line:"멀티모달 학습분석"},
   {year:2025,id:"2025-4",title:"메타버스 학습환경에서 인지조절 전략 제공 방식과 과제 유형이 대학생의 학습참여와 정서에 미치는 영향",journal:"교육방법연구 (KCI)",lang:"ko",type:"journal",coauthors:[],role:"단독",keywords:["메타버스","인지조절전략","학습참여","정서","과제유형"],tech:["메타버스"],method:["실험연구"],target:["대학생"],dv:["학습참여","정서"],line:"메타버스 학습환경"},
 ];
+// ↑ legacy data kept as fallback structure reference only
 
 // Color mapping
 const lineColors = {
@@ -1822,6 +1830,7 @@ filterRow.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 renderTable('all');
+} // end initDashboard
 </script>
 </body>
 </html>
