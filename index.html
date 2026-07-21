@@ -1403,7 +1403,7 @@ function zu(){return zu=Object.assign||function(g){for(var t=1;t<arguments.lengt
 </div>
 
 <script>
-fetch('https://yangbyul.github.io/eunbyul-yang/data/papers.json')
+fetch('https://yangbyul.github.io/eunbyul-yang/data/papers.json?v=' + Date.now())
   .then(r => r.json())
   .then(papers => { initDashboard(papers); })
   .catch(() => { console.error('Failed to load papers.json'); });
