@@ -72,7 +72,7 @@
   .tl-meta { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
 
   /* Research line badges */
-  .line-badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:600; }
+  .line-badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:600; white-space:nowrap; }
   .line-sim { background:#60a5fa33; color:#60a5fa; }
   .line-agent { background:#a78bfa33; color:#a78bfa; }
   .line-meta { background:#34d39933; color:#34d399; }
@@ -1802,16 +1802,16 @@ function renderTable(filter) {
   tbody.innerHTML = filtered.sort((a,b) => b.year - a.year || a.id.localeCompare(b.id)).map(p => {
     const lc = lineColors[p.line] || {cls:'line-sim'};
     const jMatch = p.journal.match(/\(([^)]+)\)\s*$/);
-    const idx = jMatch ? jMatch[1] : (p.type==='conference'?'Proceedings':p.type==='book_chapter'?'Book Chapter':'');
+    const idx = p.type==='conference' ? 'Proceedings' : jMatch ? jMatch[1] : (p.type==='book_chapter'?'Book Chapter':'');
     const jName = jMatch ? p.journal.replace(/\s*\([^)]+\)\s*$/, '') : p.journal;
     const idxColor = idx.includes('SSCI')?'#60a5fa':idx.includes('SCOPUS')?'#34d399':idx.includes('KCI')?'#fbbf24':'var(--muted)';
     return `<tr>
       <td>${p.year}</td>
       <td style="max-width:400px">${p.title.length > 70 ? p.title.slice(0,70)+'...' : p.title}</td>
-      <td style="font-size:0.75rem">${jName}</td>
+      <td style="font-size:0.72rem;max-width:200px">${jName}</td>
       <td style="font-size:0.7rem;white-space:nowrap"><span style="color:${idxColor}">${idx}</span></td>
       <td style="white-space:nowrap"><span style="color:${p.role==='1저자'||p.role==='교신저자'||p.role==='단독'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
-      <td><span class="line-badge ${lc.cls}">${p.line}</span></td>
+      <td style="white-space:nowrap"><span class="line-badge ${lc.cls}">${p.line}</span></td>
       <td style="font-size:0.7rem;color:var(--muted)">${p.tech.join(', ')}</td>
     </tr>`;
   }).join('');
