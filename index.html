@@ -1810,7 +1810,7 @@ function renderTable(filter) {
       <td style="max-width:400px">${p.title.length > 70 ? p.title.slice(0,70)+'...' : p.title}</td>
       <td style="font-size:0.72rem;max-width:200px">${jName}</td>
       <td style="font-size:0.7rem;white-space:nowrap"><span style="color:${idxColor}">${idx}</span></td>
-      <td style="white-space:nowrap"><span style="color:${p.role==='1저자'||p.role==='교신저자'||p.role==='단독'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
+      <td style="white-space:nowrap"><span style="color:${p.role==='단독'?'var(--accent4)':p.role==='1저자'||p.role==='교신저자'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
       <td style="white-space:nowrap"><span class="line-badge ${lc.cls}">${p.line}</span></td>
       <td style="font-size:0.7rem;color:var(--muted)">${p.tech.join(', ')}</td>
     </tr>`;
