@@ -1497,7 +1497,7 @@ grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column">
 grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h2 style="margin-bottom:0.5rem"><span>🏷️</span> 키워드 동시출현 네트워크 <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(드래그/줌 가능)</span></h2><div style="position:relative"><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend" style="position:absolute;bottom:1rem;left:0;right:0"></div></div></div>`;
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
-grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><canvas id="chartMethod"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">연구설계 (논문당 1개)</div><canvas id="chartMethod"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">측정·분석 기법 (중복 허용)</div><canvas id="chartTechnique"></canvas></div>`;
 grid.innerHTML += `<div class="card"><h2><span>📚</span> 국문/영문 저널 비율 변화</h2><canvas id="chartLang"></canvas></div>`;
 
 // Row 5: 주요 종속변인 | 연구 대상
@@ -1716,6 +1716,25 @@ new Chart(document.getElementById('chartMethod'), {
     }]
   },
   options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}},y:{ticks:{color:'#94a3b8'},grid:{display:false}}} }
+});
+
+// Technique chart (measurement/analysis techniques, multiple per paper)
+const techniqueCounts = {};
+papers.forEach(p => (p.technique || []).forEach(m => { techniqueCounts[m] = (techniqueCounts[m]||0) + 1; }));
+const tqLabels = Object.keys(techniqueCounts).sort((a,b) => techniqueCounts[b]-techniqueCounts[a]);
+
+new Chart(document.getElementById('chartTechnique'), {
+  type: 'bar',
+  data: {
+    labels: tqLabels,
+    datasets: [{
+      data: tqLabels.map(m => techniqueCounts[m]),
+      backgroundColor: tqLabels.map((_, i) => techColors[(i + 3) % techColors.length] + '88'),
+      borderColor: tqLabels.map((_, i) => techColors[(i + 3) % techColors.length]),
+      borderWidth: 1, borderRadius: 6,
+    }]
+  },
+  options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}},y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{display:false}}} }
 });
 
 // Language ratio by year
