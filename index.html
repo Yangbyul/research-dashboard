@@ -1473,7 +1473,7 @@ const uniqueJournals = [...new Set(papers.map(p => p.journal))].length;
 document.getElementById('statsRow').innerHTML = [
   {num: totalPapers, label: "총 논문 수", color: "var(--accent)"},
   {num: firstAuthor, label: "1저자/교신", color: "var(--accent2)"},
-  {num: intlPapers, label: "국외 논문", color: "var(--accent3)"},
+  {num: intlPapers, label: "영문 논문", color: "var(--accent3)"},
   {num: ssciPapers, label: "SSCI/SCIE/SCOPUS", color: "var(--accent4)"},
   {num: papers.filter(p=>p.journal&&p.journal.includes('KCI')).length, label: "KCI", color: "var(--accent5)"},
   {num: papers.filter(p=>p.type==='book_chapter'||p.type==='conference').length, label: "Proceedings/Chapters", color: "var(--accent6)"},
@@ -1495,7 +1495,7 @@ grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
 grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><canvas id="chartMethod"></canvas></div>`;
-grid.innerHTML += `<div class="card"><h2><span>📚</span> 국내/국외 저널 비율 변화</h2><canvas id="chartLang"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>📚</span> 국문/영문 저널 비율 변화</h2><canvas id="chartLang"></canvas></div>`;
 
 // Row 5: 주요 종속변인 | 연구 대상
 grid.innerHTML += `<div class="card"><h2><span>📐</span> 주요 종속변인 빈도</h2><canvas id="chartDV"></canvas></div>`;
@@ -1727,8 +1727,8 @@ new Chart(document.getElementById('chartLang'), {
   data: {
     labels: years,
     datasets: [
-      { label: '국내', data: years.map(y => langByYear[y].ko), backgroundColor: '#60a5fa88', borderColor: '#60a5fa', borderWidth: 1 },
-      { label: '국외', data: years.map(y => langByYear[y].en), backgroundColor: '#34d39988', borderColor: '#34d399', borderWidth: 1 },
+      { label: '국문', data: years.map(y => langByYear[y].ko), backgroundColor: '#60a5fa88', borderColor: '#60a5fa', borderWidth: 1 },
+      { label: '영문', data: years.map(y => langByYear[y].en), backgroundColor: '#34d39988', borderColor: '#34d399', borderWidth: 1 },
     ]
   },
   options: { responsive:true, scales:{x:{stacked:true,ticks:{color:'#94a3b8'},grid:{display:false}},y:{stacked:true,ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}}}, plugins:{legend:{labels:{color:'#e2e8f0'}}} }
