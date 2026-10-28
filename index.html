@@ -58,6 +58,9 @@
   .kw-legend span { padding: 0.2rem 0.5rem; border-radius: 10px; background: #ffffff08; }
 
   /* Timeline */
+  .lang-toggle { display:flex; border:1px solid #334155; border-radius:6px; overflow:hidden; }
+  .lang-toggle button { background:transparent; border:0; color:#8892a4; font-size:0.7rem; padding:0.25rem 0.55rem; cursor:pointer; }
+  .lang-toggle button.active { background:#334155; color:#e2e8f0; }
   .flow-tabs { display:flex; gap:0.4rem; margin-bottom:0.8rem; flex-wrap:wrap; }
   .flow-tab { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:0.25rem 0.8rem; font-size:0.75rem; cursor:pointer; }
   .flow-tab.active { background:var(--border); color:var(--text); }
@@ -1388,9 +1391,12 @@ function zu(){return zu=Object.assign||function(g){for(var t=1;t<arguments.lengt
 <div style="position:sticky;top:0;z-index:100;background:rgba(15,23,42,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #334155;padding:0.6rem 0.5rem;display:flex;align-items:center;justify-content:space-between;width:100%">
   <div>
     <span style="font-weight:700;font-size:0.95rem;color:#e2e8f0">Research Portfolio</span>
-    <span style="color:#8892a4;font-size:0.7rem;margin-left:0.5rem">양은별 | 제주대 초등교육학전공</span>
+    <span style="color:#8892a4;font-size:0.7rem;margin-left:0.5rem" id="hdrSub"></span>
   </div>
+  <div style="display:flex;gap:0.5rem;align-items:center">
+  <div class="lang-toggle" role="group" aria-label="Language"><button data-lang="en">EN</button><button data-lang="ko">한</button></div>
   <a href="https://yangbyul.github.io/eunbyul-yang/" style="color:#8892a4;text-decoration:none;font-size:0.7rem;padding:0.25rem 0.6rem;border:1px solid #334155;border-radius:6px;white-space:nowrap">← Home</a>
+  </div>
 </div>
 
 <div class="main-wrap">
@@ -1399,12 +1405,61 @@ function zu(){return zu=Object.assign||function(g){for(var t=1;t<arguments.lengt
 </div>
 
 <script>
+// ===== i18n: English by default (public page); the viewer's choice is remembered per browser =====
+let LANG = 'en';
+try { LANG = localStorage.getItem('dashLang') || 'en'; } catch (e) {}
+{ const q = new URLSearchParams(location.search).get('lang'); if (q === 'en' || q === 'ko') LANG = q; }
+const T = (ko, en) => LANG === 'en' ? en : ko;
+const TAG_EN = {
+  // research lines
+  "교수학습 에이전트":"Pedagogical Agents","수업시뮬레이션":"Teaching Simulation","메타버스 학습환경":"Metaverse Learning Environments",
+  "멀티모달 학습분석":"Multimodal Learning Analytics","AR/VR 학습자료":"AR/VR Learning Materials","AI 교육":"AI Education",
+  "공간컴퓨팅":"Spatial Computing","교사교육":"Teacher Education",
+  // research design
+  "실험연구":"Experimental","조사연구":"Survey","문헌연구":"Literature Review","텍스트분석":"Text Analysis","개발연구":"Development","질적연구":"Qualitative",
+  // techniques
+  "시선추적":"Eye Tracking","멀티모달분석":"Multimodal Analysis","의미연결망분석":"Semantic Network Analysis","딥러닝":"Deep Learning",
+  "내용분석":"Content Analysis","표정분석":"Facial Expression Analysis","텍스트마이닝":"Text Mining","면담":"Interview","잠재프로파일분석":"Latent Profile Analysis",
+  // technology / media
+  "시뮬레이션":"Simulation","아바타":"Avatar","메타버스":"Metaverse","동영상":"Video","디지털트윈":"Digital Twin",
+  // participants
+  "대학생":"Undergraduates","교사":"In-service Teachers","예비교사":"Pre-service Teachers","치대학생":"Dental Students","초등학생":"Elementary Students",
+  "고등학생":"High School Students","중학생":"Middle School Students","일반인":"General Public","교육과정":"Curriculum Documents",
+  // outcome variables
+  "인지부하":"Cognitive Load","주의집중":"Attention","가상실재감":"Virtual Presence","정서":"Emotion","과제부하":"Task Load",
+  "의인화지각":"Perceived Anthropomorphism","실재감":"Presence","사용자경험":"User Experience","사용의도":"Intention to Use","수행":"Performance",
+  "사용자지각":"User Perception","학습효과":"Learning Outcomes","사용편의성":"Ease of Use","사용성":"Usability","윤리가이드라인":"Ethics Guidelines",
+  "시선응시":"Gaze Fixation","동공지름":"Pupil Diameter","감정인식":"Emotion Recognition","중복효과":"Redundancy Effect","공간탐색":"Spatial Navigation",
+  "교육과정분석":"Curriculum Analysis","정서판단":"Emotion Judgment","흥미":"Interest","친밀감":"Intimacy","학습실재감":"Learning Presence",
+  "정서인식":"Emotion Perception","교수효능감":"AI Teaching Efficacy","만족도":"Satisfaction","추천의향":"Intention to Recommend","수업효능감":"Teaching Efficacy",
+  "키워드추출정확도":"Keyword Extraction Accuracy","시나리오설계":"Scenario Design","인지적학습경험":"Cognitive Learning Experience","협력학습":"Collaborative Learning",
+  "학습참여":"Learning Engagement","정서참여":"Emotional Engagement","공간적상호작용":"Spatial Interaction","몰입":"Flow","지각된유능감":"Perceived Competence",
+};
+const ROLE_EN = {"1저자":"First author","교신저자":"Corresponding","공저자":"Co-author","단독":"Sole author"};
+const tr = v => LANG === 'en' ? (TAG_EN[v] || v) : v;
+const trKeys = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [tr(k), v]));
+document.documentElement.lang = LANG;
+document.title = T('연구 실적 대시보드 - 양은별', 'Research Dashboard - Eunbyul Yang');
+document.getElementById('hdrSub').textContent = T('양은별 | 제주대 초등교육학전공', 'Eunbyul Yang | Elementary Education, Jeju National University');
+document.querySelectorAll('.lang-toggle button').forEach(b => {
+  b.classList.toggle('active', b.dataset.lang === LANG);
+  b.addEventListener('click', () => {
+    if (b.dataset.lang === LANG) return;
+    try { localStorage.setItem('dashLang', b.dataset.lang); } catch (e) {}
+    const u = new URL(location.href); u.searchParams.set('lang', b.dataset.lang); location.href = u.toString();
+  });
+});
+
 fetch('https://yangbyul.github.io/eunbyul-yang/data/papers.json?v=' + Date.now())
   .then(r => r.json())
   .then(papers => { initDashboard(papers); })
   .catch(() => { console.error('Failed to load papers.json'); });
 
 function initDashboard(papers) {
+if (LANG === 'en') papers.forEach(p => {
+  if (p.line) p.line = tr(p.line);
+  ['method','technique','tech','target','dv'].forEach(f => { if (Array.isArray(p[f])) p[f] = p[f].map(tr); });
+});
 const _legacy_removed = [
   {year:2018,id:"2018-1",title:"증강현실 학습자료의 세분화 정도가 초등학생의 사용편의성과 인지부하에 미치는 영향",journal:"교육연구 (국내 기타)",lang:"ko",type:"journal",coauthors:["류지헌"],role:"1저자",keywords:["증강현실","세분화","사용편의성","인지부하","초등학생"],tech:["AR"],method:["실험연구"],target:["초등학생"],dv:["사용편의성","인지부하"],line:"AR/VR 학습자료"},
   {year:2019,id:"2019-1",title:"예비교사를 위한 수업시뮬레이션에서 시나리오 유형과 수행 안내 방법에 따른 가상실재감과 사용성 지각의 차이",journal:"미래교육학연구 (KCI)",lang:"ko",type:"journal",coauthors:["류지헌"],role:"1저자",keywords:["수업시뮬레이션","시나리오","가상실재감","사용성","예비교사"],tech:["VR","시뮬레이션"],method:["실험연구"],target:["예비교사"],dv:["가상실재감","사용성"],line:"수업시뮬레이션"},
@@ -1458,6 +1513,7 @@ const lineColors = {
   "공간컴퓨팅": {bg:"#22d3ee33",fg:"#22d3ee",cls:"line-spatial"},
   "교사교육": {bg:"#f472b633",fg:"#f472b6",cls:"line-teacher"},
 };
+Object.assign(lineColors, trKeys(lineColors));
 
 // ===== STATS ROW =====
 const totalPapers = papers.length;
@@ -1469,11 +1525,11 @@ const years = [...new Set(papers.map(p => p.year))].sort();
 const uniqueJournals = [...new Set(papers.map(p => p.journal))].length;
 
 document.getElementById('statsRow').innerHTML = [
-  {num: totalPapers, label: "총 논문 수", color: "var(--accent)"},
-  {num: firstAuthor, label: "1저자/교신", color: "var(--accent2)"},
+  {num: totalPapers, label: T("총 논문 수","Total Publications"), color: "var(--accent)"},
+  {num: firstAuthor, label: T("1저자/교신","First/Corresponding Author"), color: "var(--accent2)"},
   {num: ssciPapers, label: "SSCI/SCIE/SCOPUS", color: "var(--accent4)"},
   {num: kciPapers, label: "KCI", color: "var(--accent5)"},
-  {num: totalPapers - ssciPapers - kciPapers - procPapers, label: "기타 저널", color: "var(--accent3)"},
+  {num: totalPapers - ssciPapers - kciPapers - procPapers, label: T("기타 저널","Other Journals"), color: "var(--accent3)"},
   {num: procPapers, label: "Proceedings/Book Chapter", color: "var(--accent6)"},
 ].map(s => `<div class="stat-card"><div class="num" style="color:${s.color}">${s.num}</div><div class="label">${s.label}</div></div>`).join('');
 
@@ -1481,32 +1537,32 @@ document.getElementById('statsRow').innerHTML = [
 const grid = document.getElementById('mainGrid');
 
 // Row 1: 연도별 논문 수 | 연구 라인별 분포
-grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>📊</span> 연도별 논문 수</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartYear"></canvas></div></div>`;
-grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>🧬</span> 연구 라인별 분포</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartLines"></canvas></div></div>`;
+grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>📊</span> ${T("연도별 논문 수","Publications by Year")}</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartYear"></canvas></div></div>`;
+grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>🧬</span> ${T("연구 라인별 분포","Research Lines")}</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartLines"></canvas></div></div>`;
 
 // Row 2: 기술/매체 변화 추이 | 키워드 워드클라우드
-grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>💻</span> 기술/매체 변화 추이</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartTech"></canvas></div></div>`;
-grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>☁️</span> 키워드 워드클라우드</h2><div style="flex:1;position:relative;min-height:300px"><canvas id="kwCloudCanvas" style="width:100%;height:100%"></canvas></div></div>`;
+grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>💻</span> ${T("기술/매체 변화 추이","Technology/Media Trends")}</h2><div style="flex:1;display:flex;align-items:center"><canvas id="chartTech"></canvas></div></div>`;
+grid.innerHTML += `<div class="card" style="display:flex;flex-direction:column"><h2><span>☁️</span> ${T("키워드 워드클라우드","Keyword Cloud")}</h2><div style="flex:1;position:relative;min-height:300px"><canvas id="kwCloudCanvas" style="width:100%;height:100%"></canvas></div></div>`;
 
 // Row 3: 키워드 동시출현 네트워크 (full-width)
-grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h2 style="margin-bottom:0.5rem"><span>🏷️</span> 키워드 동시출현 네트워크 <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(드래그/줌 가능)</span></h2><div style="position:relative"><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend" style="position:absolute;bottom:1rem;left:0;right:0"></div></div></div>`;
+grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h2 style="margin-bottom:0.5rem"><span>🏷️</span> ${T("키워드 동시출현 네트워크","Keyword Co-occurrence Network")} <span style="font-size:0.7rem;font-weight:400;color:#94a3b8">(${T("드래그/줌 가능","drag/zoom")})</span></h2><div style="position:relative"><div id="kwNetworkVis" style="height:500px;width:100%"></div><div class="kw-legend" id="kwLegend" style="position:absolute;bottom:1rem;left:0;right:0"></div></div></div>`;
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
-grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">연구설계 (논문당 1개)</div><canvas id="chartMethod"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">측정·분석 기법 (중복 허용)</div><canvas id="chartTechnique"></canvas></div>`;
-grid.innerHTML += `<div class="card"><h2><span>📚</span> 저널 구성 변화</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">국문/영문</div><canvas id="chartLang"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">인덱스</div><canvas id="chartIndex"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>🔬</span> ${T("연구 방법론 분포","Research Methods")}</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">${T("연구설계 (논문당 1개)","Research design (one per paper)")}</div><canvas id="chartMethod"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">${T("측정·분석 기법 (중복 허용)","Measurement & analysis techniques (multiple per paper)")}</div><canvas id="chartTechnique"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>📚</span> ${T("저널 구성 변화","Journal Composition")}</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">${T("국문/영문","Korean/English")}</div><canvas id="chartLang"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">${T("인덱스","Index")}</div><canvas id="chartIndex"></canvas></div>`;
 
 // Row 5: 주요 종속변인 | 연구 대상
-grid.innerHTML += `<div class="card"><h2><span>📐</span> 주요 종속변인 빈도</h2><canvas id="chartDV"></canvas></div>`;
-grid.innerHTML += `<div class="card"><h2><span>👥</span> 연구 대상</h2><canvas id="chartTarget"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>📐</span> ${T("주요 종속변인 빈도","Key Outcome Variables")}</h2><canvas id="chartDV"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>👥</span> ${T("연구 대상","Participants")}</h2><canvas id="chartTarget"></canvas></div>`;
 
 // Row 6: 연구 흐름 매트릭스 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>🗺️</span> 연도별 연구 흐름</h2><div class="flow-tabs" id="flowTabs"><button class="flow-tab active" data-dim="line">연구 라인</button><button class="flow-tab" data-dim="method">연구설계</button><button class="flow-tab" data-dim="tech">기술/매체</button></div><div id="flowMatrix" style="position:relative"></div><div class="flow-note">버블 크기 = 그해 논문 수 · 한 논문이 여러 기술/매체를 쓰면 각각 셉니다 · 버블에 마우스를 올리면 논문 제목</div></div>`;
+grid.innerHTML += `<div class="card full-width"><h2><span>🗺️</span> ${T("연도별 연구 흐름","Research Flow by Year")}</h2><div class="flow-tabs" id="flowTabs"><button class="flow-tab active" data-dim="line">${T("연구 라인","Research Line")}</button><button class="flow-tab" data-dim="method">${T("연구설계","Research Design")}</button><button class="flow-tab" data-dim="tech">${T("기술/매체","Technology/Media")}</button></div><div id="flowMatrix" style="position:relative"></div><div class="flow-note">${T("버블 크기 = 그해 논문 수 · 한 논문이 여러 기술/매체를 쓰면 각각 셉니다 · 버블에 마우스를 올리면 논문 제목","Bubble size = papers that year · a paper using several technologies counts once in each · hover a bubble for titles")}</div></div>`;
 
 // Row 7: 향후 연구 방향 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>💡</span> 향후 연구 방향</h2><div id="suggestions"></div></div>`;
+grid.innerHTML += `<div class="card full-width"><h2><span>💡</span> ${T("향후 연구 방향","Future Directions")}</h2><div id="suggestions"></div></div>`;
 
 // Row 8: 전체 논문 목록 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>📋</span> 전체 논문 목록</h2><div class="filter-row" id="filterRow"></div><div class="table-scroll"><table class="paper-table" id="paperTable"><thead><tr><th>연도</th><th>제목</th><th>저널</th><th>구분</th><th>역할</th><th>연구라인</th><th>기술</th></tr></thead><tbody></tbody></table></div></div>`;
+grid.innerHTML += `<div class="card full-width"><h2><span>📋</span> ${T("전체 논문 목록","All Publications")}</h2><div class="filter-row" id="filterRow"></div><div class="table-scroll"><table class="paper-table" id="paperTable"><thead><tr><th>${T("연도","Year")}</th><th>${T("제목","Title")}</th><th>${T("저널","Journal")}</th><th>${T("구분","Index")}</th><th>${T("역할","Role")}</th><th>${T("연구라인","Research Line")}</th><th>${T("기술","Technology")}</th></tr></thead><tbody></tbody></table></div></div>`;
 
 // ===== CHARTS =====
 const yearCounts = {};
@@ -1517,7 +1573,7 @@ new Chart(document.getElementById('chartYear'), {
   data: {
     labels: years,
     datasets: [{
-      label: '논문 수',
+      label: T('논문 수','Publications'),
       data: years.map(y => yearCounts[y]),
       backgroundColor: '#60a5fa88',
       borderColor: '#60a5fa',
@@ -1611,6 +1667,7 @@ new Chart(document.getElementById('chartTech'), {
     "수업시뮬레이션":"#60a5fa","교수학습 에이전트":"#a78bfa","메타버스 학습환경":"#34d399",
     "멀티모달 학습분석":"#fbbf24","AR/VR 학습자료":"#f87171","AI 교육":"#fb923c"
   };
+  Object.assign(communityColors, trKeys(communityColors));
 
   // Build vis nodes
   const visNodes = topKws.map(k => {
@@ -1662,7 +1719,7 @@ new Chart(document.getElementById('chartTech'), {
   const usedCommunities = [...new Set(visNodes.map(n => n.community))].filter(Boolean);
   document.getElementById('kwLegend').innerHTML =
     usedCommunities.map(c => `<span style="border-left:3px solid ${communityColors[c]||'#94a3b8'};padding-left:0.4rem">${c}</span>`).join('') +
-    `<span style="margin-left:1rem">| 노드 크기 = 연결중심성 | 간선 굵기 = 동시출현 빈도</span>`;
+    `<span style="margin-left:1rem">| ${T("노드 크기 = 연결중심성 | 간선 굵기 = 동시출현 빈도","Node size = degree centrality | Edge width = co-occurrence")}</span>`;
 }
 
 // Keyword word cloud (canvas-based with wordcloud2)
@@ -1744,8 +1801,8 @@ new Chart(document.getElementById('chartLang'), {
   data: {
     labels: years,
     datasets: [
-      { label: '국문', data: years.map(y => langByYear[y].ko), backgroundColor: '#60a5fa88', borderColor: '#60a5fa', borderWidth: 1 },
-      { label: '영문', data: years.map(y => langByYear[y].en), backgroundColor: '#34d39988', borderColor: '#34d399', borderWidth: 1 },
+      { label: T('국문','Korean'), data: years.map(y => langByYear[y].ko), backgroundColor: '#60a5fa88', borderColor: '#60a5fa', borderWidth: 1 },
+      { label: T('영문','English'), data: years.map(y => langByYear[y].en), backgroundColor: '#34d39988', borderColor: '#34d399', borderWidth: 1 },
     ]
   },
   options: { responsive:true, scales:{x:{stacked:true,ticks:{color:'#94a3b8'},grid:{display:false}},y:{stacked:true,ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}}}, plugins:{legend:{labels:{color:'#e2e8f0'}}} }
@@ -1757,10 +1814,10 @@ const indexOf = p => {
   const j = p.journal || '';
   if (j.includes('SSCI') || j.includes('SCIE') || j.includes('SCOPUS')) return 'SSCI/SCIE/SCOPUS';
   if (j.includes('KCI')) return 'KCI';
-  return '기타 저널';
+  return T('기타 저널','Other Journals');
 };
 const indexBuckets = [
-  ['SSCI/SCIE/SCOPUS', '#fbbf24'], ['KCI', '#f87171'], ['기타 저널', '#34d399'], ['Proceedings/Book Chapter', '#fb923c'],
+  ['SSCI/SCIE/SCOPUS', '#fbbf24'], ['KCI', '#f87171'], [T('기타 저널','Other Journals'), '#34d399'], ['Proceedings/Book Chapter', '#fb923c'],
 ];
 new Chart(document.getElementById('chartIndex'), {
   type: 'bar',
@@ -1837,12 +1894,12 @@ new Chart(document.getElementById('chartTarget'), {
     const labelW = 130, totalW = 44, rowH = 34, topH = 26;
     const W = 960, plotW = W - labelW - totalW, colW = plotW / allYears.length;
     const H = topH + rows.length * rowH + 4, maxR = Math.min(rowH, colW) / 2 - 2;
-    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="연도별 연구 흐름" style="display:block;font-family:inherit">`;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${T("연도별 연구 흐름","Research flow by year")}" style="display:block;font-family:inherit">`;
     allYears.forEach((y, i) => {
       const x = labelW + colW * (i + 0.5);
       svg += `<text x="${x}" y="16" text-anchor="middle" font-size="12" fill="${neutral}">${y}</text>`;
     });
-    svg += `<text x="${W - totalW/2}" y="16" text-anchor="middle" font-size="11" fill="${neutral}">계</text>`;
+    svg += `<text x="${W - totalW/2}" y="16" text-anchor="middle" font-size="11" fill="${neutral}">${T("계","Total")}</text>`;
     rows.forEach((r, ri) => {
       const cy = topH + ri * rowH + rowH / 2;
       const color = dim === 'line' ? ((lineColors[r] || {}).fg || '#60a5fa') : '#60a5fa';
@@ -1865,7 +1922,7 @@ new Chart(document.getElementById('chartTarget'), {
     box.querySelectorAll('.flow-dot').forEach(g => {
       g.addEventListener('mousemove', e => {
         const [r, y] = g.dataset.k.split('|'); const list = cells[g.dataset.k];
-        tip.innerHTML = `<b>${esc(y)} · ${esc(r)} · ${list.length}편</b>` + list.map(t => `<div class="t">· ${esc(t.length > 60 ? t.slice(0,60) + '…' : t)}</div>`).join('');
+        tip.innerHTML = `<b>${esc(y)} · ${esc(r)} · ${list.length}${T("편", list.length > 1 ? " papers" : " paper")}</b>` + list.map(t => `<div class="t">· ${esc(t.length > 60 ? t.slice(0,60) + '…' : t)}</div>`).join('');
         const rect = box.getBoundingClientRect();
         let x = e.clientX - rect.left + 12; if (x > rect.width - 350) x = e.clientX - rect.left - 352;
         tip.style.left = Math.max(0, x) + 'px'; tip.style.top = (e.clientY - rect.top + 12) + 'px'; tip.style.display = 'block';
@@ -1881,7 +1938,12 @@ new Chart(document.getElementById('chartTarget'), {
 })();
 
 // Future suggestions
-document.getElementById('suggestions').innerHTML = `
+document.getElementById('suggestions').innerHTML = LANG === 'en' ? `
+  <div class="suggestion"><strong>1. Multimodal Analytics + AI Education:</strong> Apply EEG, eye-tracking, and facial-expression analysis to AI education contexts, e.g., multimodal analysis of learners' cognitive and emotional changes while using AI tools.</div>
+  <div class="suggestion"><strong>2. Extending Teaching Simulation:</strong> Extend teacher-focused simulations to other professions such as healthcare and counseling, building on prior VR research with dental students.</div>
+  <div class="suggestion"><strong>3. Generative AI + Simulation:</strong> Build on the 2023 ChatGPT study toward LLM-driven autonomous virtual students and parents, and automatic scenario generation for teaching simulations.</div>
+  <div class="suggestion"><strong>4. Diversifying Participants:</strong> Expand beyond undergraduates to K-12, special education, and vocational training, including multicultural education contexts in Jeju.</div>
+` : `
   <div class="suggestion"><strong>1. 멀티모달 분석 + AI 교육:</strong> EEG, 시선추적, 표정분석 역량을 AI 교육 맥락에 적용. 예: AI 도구 사용 시 학습자의 인지-정서 변화를 멀티모달로 분석.</div>
   <div class="suggestion"><strong>2. 수업시뮬레이션의 확장:</strong> 현재 교사 대상 시뮬레이션을 의료, 상담 등 다른 전문직으로 확대. 이미 치대 VR 연구 경험이 있으므로 자연스러운 확장.</div>
   <div class="suggestion"><strong>3. 생성형 AI + 시뮬레이션:</strong> ChatGPT 연구(2023)를 발전시켜, LLM 기반 자율적 가상 학생/학부모 구현. 수업시뮬레이션의 시나리오 자동 생성 연구.</div>
@@ -1904,8 +1966,8 @@ function renderTable(filter) {
       <td>${p.year}</td>
       <td style="max-width:400px">${p.title.length > 70 ? p.title.slice(0,70)+'...' : p.title}</td>
       <td style="font-size:0.72rem;max-width:200px">${jName}</td>
-      <td style="font-size:0.7rem;white-space:nowrap"><span style="color:${idxColor}">${idx}</span></td>
-      <td style="white-space:nowrap"><span style="color:${p.role==='단독'?'var(--accent4)':p.role==='1저자'||p.role==='교신저자'?'var(--accent3)':'var(--muted)'}">${p.role}</span></td>
+      <td style="font-size:0.7rem;white-space:nowrap"><span style="color:${idxColor}">${idx === '기타' ? T('기타','Other') : idx}</span></td>
+      <td style="white-space:nowrap"><span style="color:${p.role==='단독'?'var(--accent4)':p.role==='1저자'||p.role==='교신저자'?'var(--accent3)':'var(--muted)'}">${LANG === 'en' ? (ROLE_EN[p.role] || p.role) : p.role}</span></td>
       <td style="white-space:nowrap"><span class="line-badge ${lc.cls}">${p.line}</span></td>
       <td style="font-size:0.7rem;color:var(--muted)">${p.tech.join(', ')}</td>
     </tr>`;
@@ -1914,7 +1976,7 @@ function renderTable(filter) {
 
 // Filter buttons
 const filterRow = document.getElementById('filterRow');
-filterRow.innerHTML = `<button class="filter-btn active" data-f="all">전체</button>` +
+filterRow.innerHTML = `<button class="filter-btn active" data-f="all">${T("전체","All")}</button>` +
   lineLabels.map(l => `<button class="filter-btn" data-f="${l}">${l}</button>`).join('');
 
 filterRow.querySelectorAll('.filter-btn').forEach(btn => {
