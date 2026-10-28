@@ -1467,19 +1467,19 @@ const lineColors = {
 // ===== STATS ROW =====
 const totalPapers = papers.length;
 const firstAuthor = papers.filter(p => p.role === "1저자").length;
-const intlPapers = papers.filter(p => p.lang === "en").length;
 const ssciPapers = papers.filter(p => p.journal.includes("SSCI") || p.journal.includes("SCIE") || p.journal.includes("SCOPUS")).length;
 const kciPapers = papers.filter(p => p.journal && p.journal.includes('KCI')).length;
+const procPapers = papers.filter(p => p.type === 'book_chapter' || p.type === 'conference').length;
 const years = [...new Set(papers.map(p => p.year))].sort();
 const uniqueJournals = [...new Set(papers.map(p => p.journal))].length;
 
 document.getElementById('statsRow').innerHTML = [
   {num: totalPapers, label: "총 논문 수", color: "var(--accent)"},
   {num: firstAuthor, label: "1저자/교신", color: "var(--accent2)"},
-  {num: intlPapers, label: "영문 논문", color: "var(--accent3)"},
   {num: ssciPapers, label: "SSCI/SCIE/SCOPUS", color: "var(--accent4)"},
   {num: kciPapers, label: "KCI", color: "var(--accent5)"},
-  {num: totalPapers - ssciPapers - kciPapers, label: "기타", color: "var(--accent6)"},
+  {num: totalPapers - ssciPapers - kciPapers - procPapers, label: "기타 저널", color: "var(--accent3)"},
+  {num: procPapers, label: "Proceedings/Book Chapter", color: "var(--accent6)"},
 ].map(s => `<div class="stat-card"><div class="num" style="color:${s.color}">${s.num}</div><div class="label">${s.label}</div></div>`).join('');
 
 // ===== BUILD GRID =====
