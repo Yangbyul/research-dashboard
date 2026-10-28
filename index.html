@@ -58,18 +58,13 @@
   .kw-legend span { padding: 0.2rem 0.5rem; border-radius: 10px; background: #ffffff08; }
 
   /* Timeline */
-  .timeline { position: relative; padding-left: 2rem; }
-  .timeline::before { content:''; position:absolute; left:0.7rem; top:0; bottom:0; width:2px; background:var(--border); }
-  .tl-item { position:relative; margin-bottom:1.2rem; }
-  .tl-item::before { content:''; position:absolute; left:-1.55rem; top:0.3rem; width:10px; height:10px; border-radius:50%; }
-  .tl-item.line1::before { background: var(--accent); }
-  .tl-item.line2::before { background: var(--accent2); }
-  .tl-item.line3::before { background: var(--accent3); }
-  .tl-item.line4::before { background: var(--accent4); }
-  .tl-item.line5::before { background: var(--accent5); }
-  .tl-year { font-size: 0.75rem; color: var(--accent); font-weight: 600; }
-  .tl-title { font-size: 0.85rem; margin-top: 0.2rem; }
-  .tl-meta { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+  .flow-tabs { display:flex; gap:0.4rem; margin-bottom:0.8rem; flex-wrap:wrap; }
+  .flow-tab { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:999px; padding:0.25rem 0.8rem; font-size:0.75rem; cursor:pointer; }
+  .flow-tab.active { background:var(--border); color:var(--text); }
+  .flow-note { font-size:0.7rem; color:var(--muted); margin-top:0.5rem; }
+  .flow-tip { position:absolute; pointer-events:none; background:#0f172a; border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.7rem; font-size:0.72rem; color:var(--text); max-width:340px; display:none; z-index:5; line-height:1.4; }
+  .flow-tip b { display:block; margin-bottom:0.25rem; }
+  .flow-tip .t { color:var(--muted); }
 
   /* Research line badges */
   .line-badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:600; white-space:nowrap; }
@@ -1504,8 +1499,8 @@ grid.innerHTML += `<div class="card"><h2><span>📚</span> 국문/영문 저널 
 grid.innerHTML += `<div class="card"><h2><span>📐</span> 주요 종속변인 빈도</h2><canvas id="chartDV"></canvas></div>`;
 grid.innerHTML += `<div class="card"><h2><span>👥</span> 연구 대상</h2><canvas id="chartTarget"></canvas></div>`;
 
-// Row 6: 연구 타임라인 (full-width)
-grid.innerHTML += `<div class="card full-width"><h2><span>🗺️</span> 연구 타임라인</h2><div id="timeline" class="timeline" style="max-height:500px;overflow-y:auto"></div></div>`;
+// Row 6: 연구 흐름 매트릭스 (full-width)
+grid.innerHTML += `<div class="card full-width"><h2><span>🗺️</span> 연도별 연구 흐름</h2><div class="flow-tabs" id="flowTabs"><button class="flow-tab active" data-dim="line">연구 라인</button><button class="flow-tab" data-dim="method">연구설계</button><button class="flow-tab" data-dim="tech">기술/매체</button></div><div id="flowMatrix" style="position:relative"></div><div class="flow-note">버블 크기 = 그해 논문 수 · 한 논문이 여러 기술/매체를 쓰면 각각 셉니다 · 버블에 마우스를 올리면 논문 제목</div></div>`;
 
 // Row 7: 향후 연구 방향 (full-width)
 grid.innerHTML += `<div class="card full-width"><h2><span>💡</span> 향후 연구 방향</h2><div id="suggestions"></div></div>`;
@@ -1792,18 +1787,74 @@ new Chart(document.getElementById('chartTarget'), {
   options: { responsive:true, plugins:{legend:{position:'right',labels:{color:'#e2e8f0',font:{size:11}}}}, scales:{r:{ticks:{display:false},grid:{color:'#33415566'}}} }
 });
 
-// Timeline
-const lineClasses = {"수업시뮬레이션":"line1","교수학습 에이전트":"line2","메타버스 학습환경":"line3","멀티모달 학습분석":"line4","AR/VR 학습자료":"line5","AI 교육":"line5"};
-const tl = document.getElementById('timeline');
-const sorted = [...papers].sort((a,b) => a.year - b.year || a.id.localeCompare(b.id));
-let lastYear = null;
-sorted.forEach(p => {
-  const cls = lineClasses[p.line] || 'line1';
-  const lc = lineColors[p.line] || {cls:'line-sim'};
-  let yearHtml = '';
-  if (p.year !== lastYear) { yearHtml = `<div class="tl-year">${p.year}</div>`; lastYear = p.year; }
-  tl.innerHTML += `<div class="tl-item ${cls}">${yearHtml}<div class="tl-title">${p.title.length > 80 ? p.title.slice(0,80)+'...' : p.title}</div><div class="tl-meta"><span class="line-badge ${lc.cls}">${p.line}</span> ${p.journal} | ${p.role}</div></div>`;
-});
+// Yearly research flow matrix (x = year, rows = category, bubble area = paper count)
+(function(){
+  const box = document.getElementById('flowMatrix');
+  const tip = document.createElement('div'); tip.className = 'flow-tip';
+  const neutral = '#94a3b8';
+  const allYears = [];
+  for (let y = Math.min(...papers.map(p=>p.year)); y <= Math.max(...papers.map(p=>p.year)); y++) allYears.push(y);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function valuesOf(p, dim) {
+    if (dim === 'line') return p.line ? [p.line] : [];
+    return (p[dim] || []).filter(Boolean);
+  }
+  function draw(dim) {
+    const cells = {}; const rowsMeta = {};
+    papers.forEach(p => valuesOf(p, dim).forEach(v => {
+      const k = v + '|' + p.year;
+      (cells[k] = cells[k] || []).push(p.title);
+      const m = rowsMeta[v] = rowsMeta[v] || {first: p.year, total: 0};
+      m.first = Math.min(m.first, p.year); m.total++;
+    }));
+    let rows = Object.keys(rowsMeta).sort((a,b) => rowsMeta[a].first - rowsMeta[b].first || rowsMeta[b].total - rowsMeta[a].total);
+    if (dim === 'tech') rows = rows.filter(r => rowsMeta[r].total >= 1);
+    const maxN = Math.max(...Object.values(cells).map(c => c.length));
+    const labelW = 130, totalW = 44, rowH = 34, topH = 26;
+    const W = 960, plotW = W - labelW - totalW, colW = plotW / allYears.length;
+    const H = topH + rows.length * rowH + 4, maxR = Math.min(rowH, colW) / 2 - 2;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="연도별 연구 흐름" style="display:block;font-family:inherit">`;
+    allYears.forEach((y, i) => {
+      const x = labelW + colW * (i + 0.5);
+      svg += `<text x="${x}" y="16" text-anchor="middle" font-size="12" fill="${neutral}">${y}</text>`;
+    });
+    svg += `<text x="${W - totalW/2}" y="16" text-anchor="middle" font-size="11" fill="${neutral}">계</text>`;
+    rows.forEach((r, ri) => {
+      const cy = topH + ri * rowH + rowH / 2;
+      const color = dim === 'line' ? ((lineColors[r] || {}).fg || '#60a5fa') : '#60a5fa';
+      svg += `<line x1="${labelW}" x2="${labelW + plotW}" y1="${cy}" y2="${cy}" stroke="#334155" stroke-width="1"/>`;
+      svg += `<text x="${labelW - 10}" y="${cy + 4}" text-anchor="end" font-size="12" fill="#e2e8f0">${esc(r)}</text>`;
+      allYears.forEach((y, i) => {
+        const list = cells[r + '|' + y]; if (!list) return;
+        const n = list.length, cx = labelW + colW * (i + 0.5);
+        const rad = Math.max(5, maxR * Math.sqrt(n / maxN));
+        svg += `<g class="flow-dot" data-k="${esc(r + '|' + y)}" style="cursor:default">`
+             + `<circle cx="${cx}" cy="${cy}" r="${Math.max(rad, 14)}" fill="transparent"/>`
+             + `<circle cx="${cx}" cy="${cy}" r="${rad}" fill="${color}" fill-opacity="0.85" stroke="#1e293b" stroke-width="2"/>`
+             + (n > 1 ? `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">${n}</text>` : '')
+             + `</g>`;
+      });
+      svg += `<text x="${W - totalW/2}" y="${cy + 4}" text-anchor="middle" font-size="12" fill="${neutral}">${rowsMeta[r].total}</text>`;
+    });
+    svg += `</svg>`;
+    box.innerHTML = svg; box.appendChild(tip);
+    box.querySelectorAll('.flow-dot').forEach(g => {
+      g.addEventListener('mousemove', e => {
+        const [r, y] = g.dataset.k.split('|'); const list = cells[g.dataset.k];
+        tip.innerHTML = `<b>${esc(y)} · ${esc(r)} · ${list.length}편</b>` + list.map(t => `<div class="t">· ${esc(t.length > 60 ? t.slice(0,60) + '…' : t)}</div>`).join('');
+        const rect = box.getBoundingClientRect();
+        let x = e.clientX - rect.left + 12; if (x > rect.width - 350) x = e.clientX - rect.left - 352;
+        tip.style.left = Math.max(0, x) + 'px'; tip.style.top = (e.clientY - rect.top + 12) + 'px'; tip.style.display = 'block';
+      });
+      g.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    });
+  }
+  document.querySelectorAll('#flowTabs .flow-tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('#flowTabs .flow-tab').forEach(b => b.classList.toggle('active', b === btn));
+    draw(btn.dataset.dim);
+  }));
+  draw('line');
+})();
 
 // Future suggestions
 document.getElementById('suggestions').innerHTML = `
