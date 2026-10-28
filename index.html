@@ -1493,7 +1493,7 @@ grid.innerHTML += `<div class="card full-width" style="padding-bottom:0.5rem"><h
 
 // Row 4: 연구 방법론 분포 | 국내/국외 저널 비율
 grid.innerHTML += `<div class="card"><h2><span>🔬</span> 연구 방법론 분포</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">연구설계 (논문당 1개)</div><canvas id="chartMethod"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">측정·분석 기법 (중복 허용)</div><canvas id="chartTechnique"></canvas></div>`;
-grid.innerHTML += `<div class="card"><h2><span>📚</span> 국문/영문 저널 비율 변화</h2><canvas id="chartLang"></canvas></div>`;
+grid.innerHTML += `<div class="card"><h2><span>📚</span> 저널 구성 변화</h2><div style="font-size:0.75rem;color:#94a3b8;margin:0 0 0.25rem">국문/영문</div><canvas id="chartLang"></canvas><div style="font-size:0.75rem;color:#94a3b8;margin:1rem 0 0.25rem">인덱스</div><canvas id="chartIndex"></canvas></div>`;
 
 // Row 5: 주요 종속변인 | 연구 대상
 grid.innerHTML += `<div class="card"><h2><span>📐</span> 주요 종속변인 빈도</h2><canvas id="chartDV"></canvas></div>`;
@@ -1749,6 +1749,30 @@ new Chart(document.getElementById('chartLang'), {
     ]
   },
   options: { responsive:true, scales:{x:{stacked:true,ticks:{color:'#94a3b8'},grid:{display:false}},y:{stacked:true,ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}}}, plugins:{legend:{labels:{color:'#e2e8f0'}}} }
+});
+
+// Index composition by year (same buckets as the stat cards)
+const indexOf = p => {
+  if (p.type === 'book_chapter' || p.type === 'conference') return 'Proceedings/Book Chapter';
+  const j = p.journal || '';
+  if (j.includes('SSCI') || j.includes('SCIE') || j.includes('SCOPUS')) return 'SSCI/SCIE/SCOPUS';
+  if (j.includes('KCI')) return 'KCI';
+  return '기타 저널';
+};
+const indexBuckets = [
+  ['SSCI/SCIE/SCOPUS', '#fbbf24'], ['KCI', '#f87171'], ['기타 저널', '#34d399'], ['Proceedings/Book Chapter', '#fb923c'],
+];
+new Chart(document.getElementById('chartIndex'), {
+  type: 'bar',
+  data: {
+    labels: years,
+    datasets: indexBuckets.map(([name, color]) => ({
+      label: name,
+      data: years.map(y => papers.filter(p => p.year === y && indexOf(p) === name).length),
+      backgroundColor: color + 'cc', borderColor: '#1e293b', borderWidth: 2,
+    }))
+  },
+  options: { responsive:true, scales:{x:{stacked:true,ticks:{color:'#94a3b8'},grid:{display:false}},y:{stacked:true,ticks:{stepSize:1,color:'#94a3b8'},grid:{color:'#334155'}}}, plugins:{legend:{labels:{color:'#e2e8f0',boxWidth:12}}} }
 });
 
 // DV chart
