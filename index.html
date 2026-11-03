@@ -1517,7 +1517,7 @@ Object.assign(lineColors, trKeys(lineColors));
 
 // ===== STATS ROW =====
 const totalPapers = papers.length;
-const firstAuthor = papers.filter(p => p.role === "1저자").length;
+const firstAuthor = papers.filter(p => ["1저자","교신저자","단독"].includes(p.role)).length;
 const ssciPapers = papers.filter(p => p.journal.includes("SSCI") || p.journal.includes("SCIE") || p.journal.includes("SCOPUS")).length;
 const kciPapers = papers.filter(p => p.journal && p.journal.includes('KCI')).length;
 const procPapers = papers.filter(p => p.type === 'book_chapter' || p.type === 'conference').length;
